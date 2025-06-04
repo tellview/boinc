@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Game Show</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>AI Game Show</h1>
+
+    <button id="startGameBtn">Start New Game</button>
+
+    <h2>Game Status</h2>
+    <div>Game Session ID: <span id="gameSessionId">-</span></div>
+    <div>Current Player: <span id="currentPlayerId">-</span></div>
+    <div>Player 1 Score: <span id="player1Score">0</span></div>
+    <div>Player 2 Score: <span id="player2Score">0</span></div>
+    <div>Last Answer Result: <span id="lastAnswerResult">-</span></div>
+
+    <h2>Current Question</h2>
+    <div id="currentQuestionText">Question will appear here...</div>
+
+    <h2>Submit Answer / Next Turn</h2>
+    <div>AI's Answer: <span id="aiAnswer">-</span></div>
+    <div>
+        <label for="playerAnswer">Your Answer (AI's turn - disabled):</label>
+        <input type="text" id="playerAnswer" placeholder="AI will answer" disabled>
+        <button id="submitAnswerBtn">Process AI Turn</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
