@@ -1,10 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_sockets import Sockets # Import Sockets
 
 # Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()
+sockets = Sockets() # Initialize Sockets globally
 
 def create_app():
     # Ensure static and template folders are correctly specified relative to the app root path
@@ -38,41 +40,52 @@ def create_app():
     with app.app_context():
         from . import models
 
+    # Initialize Sockets with the app
+    sockets.init_app(app)
+
+
     # Logging Setup
     import logging
     from logging.handlers import RotatingFileHandler
     import os
+    import sys # Make sure sys is imported for stderr
 
     # Create logs directory if it doesn't exist - place it in project root for simplicity for now
-    log_dir = os.path.join(app.root_path, '..', 'logs') # app.root_path is .../app, so .. gets to project root
+    log_dir = os.path.join(app.root_path, '..', 'logs')
     if not os.path.exists(log_dir):
         try:
             os.mkdir(log_dir)
         except OSError as e:
-            # Log this failure to stderr, as app.logger might not be fully set up
             print(f"Error creating log directory {log_dir}: {e}", file=sys.stderr)
-
-
-    # Configure logging only if not in debug or testing mode,
-    # or if specifically enabled (for this exercise, let's enable it more broadly but be mindful)
-    # For simplicity of this task, we'll set it up regardless of app.debug for now to ensure it's active.
-    # In production, you'd likely use if not app.debug:
 
     log_file = os.path.join(log_dir, 'ai_game_show.log')
     try:
         file_handler = RotatingFileHandler(log_file, maxBytes=10240, backupCount=10)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-        file_handler.setLevel(logging.INFO) # Set level for the handler
+        file_handler.setLevel(logging.INFO)
 
-        # Forcefully add the handler, even if Flask in debug mode added its own.
-        # In debug, logs might go to both console and file.
-        app.logger.addHandler(file_handler)
+        # Clear existing handlers only if we are not in debug mode to avoid conflict with Flask's default
+        # if not app.debug:
+        #    app.logger.handlers.clear()
+        app.logger.addHandler(file_handler) # Add our handler
 
-        app.logger.setLevel(logging.INFO) # Set level for the app logger itself
-        app.logger.info('AI Game Show application startup')
+        app.logger.setLevel(logging.INFO)
+        if app.debug or app.testing: # Avoid duplicate startup log if Flask's default also logs it
+            pass # Startup log will be handled by Flask's default or next block
+        else:
+            app.logger.info('AI Game Show application startup')
+
+        # If in debug, Flask's default handler might already log to console.
+        # This ensures our file handler is also active.
+        if not any(isinstance(h, RotatingFileHandler) for h in app.logger.handlers):
+             app.logger.addHandler(file_handler) # Re-add if somehow removed or not added
+
+        # First log message from this setup
+        app.logger.info('AI Game Show file logging configured.')
+
+
     except Exception as e:
-        # Log this failure to stderr
         print(f"Error setting up file logger at {log_file}: {e}", file=sys.stderr)
 
 
