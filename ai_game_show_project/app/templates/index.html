@@ -9,26 +9,66 @@
 <body>
     <h1>AI Game Show</h1>
 
-    <button id="startGameBtn">Start New Game</button>
+    <div id="controls">
+        <button id="startGameBtn">Start New Game</button>
+        <button id="toggleVoiceCtrlBtn">Enable Voice Commands</button>
+    </div>
+    <div id="voiceStatus" style="margin-top: 5px; font-style: italic; min-height: 20px;">Voice control inactive.</div>
 
-    <h2>Game Status</h2>
-    <div>Game Session ID: <span id="gameSessionId">-</span></div>
-    <div>Current Player: <span id="currentPlayerId">-</span></div>
-    <div>Player 1 Score: <span id="player1Score">0</span></div>
-    <div>Player 2 Score: <span id="player2Score">0</span></div>
-    <div>Last Answer Result: <span id="lastAnswerResult">-</span></div>
+    <div id="game-info">
+        <div>Game Session ID: <span id="gameSessionId">-</span></div>
+        <div>Current Turn: <span id="currentPlayerId">-</span></div>
+        <div>Last Answer Result: <span id="lastAnswerResult">-</span></div>
+        <div>AI's Last Answer: <span id="aiAnswer">-</span></div>
+    </div>
+
+    <div id="hollywood-squares-grid">
+        <div class="player-cell" id="player-cell-0">
+            <h3 class="player-name">AI Player 1</h3>
+            <div class="avatar-placeholder" id="avatar-0">P1</div>
+            <p class="player-score">Score: <span id="player-0-score">0</span></p>
+            <div class="strikes-container">
+                Strikes: <span class="strikes-display" id="player-0-strikes"></span>
+            </div>
+        </div>
+        <div class="player-cell" id="player-cell-1">
+            <h3 class="player-name">AI Player 2</h3>
+            <div class="avatar-placeholder" id="avatar-1">P2</div>
+            <p class="player-score">Score: <span id="player-1-score">0</span></p>
+            <div class="strikes-container">
+                Strikes: <span class="strikes-display" id="player-1-strikes"></span>
+            </div>
+        </div>
+    </div>
 
     <h2>Current Question</h2>
     <div id="currentQuestionText">Question will appear here...</div>
 
+    <div id="audience-voting-area">
+        <h3>Audience Poll</h3>
+        <div id="audience-choices">Vote options will appear here.</div>
+        <div id="audience-results">Vote results will appear here.</div>
+    </div>
+
     <h2>Submit Answer / Next Turn</h2>
-    <div>AI's Answer: <span id="aiAnswer">-</span></div>
     <div>
-        <label for="playerAnswer">Your Answer (AI's turn - disabled):</label>
-        <input type="text" id="playerAnswer" placeholder="AI will answer" disabled>
+        <!-- Input field can be removed or kept for future human player -->
+        <input type="text" id="playerAnswer" placeholder="AI answers now" disabled style="display: none;">
         <button id="submitAnswerBtn">Process AI Turn</button>
+        <button id="stopGameBtn" style="background-color: #dc3545;">Stop Game</button>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <hr>
+    <div id="webrtc-poc-area">
+        <h2>WebRTC User Participation PoC</h2>
+        <video id="localVideo" autoplay playsinline muted width="320" height="240" style="border: 1px solid black; background-color: #333;"></video>
+        <br>
+        <button id="startWebcamBtn">Start Webcam & Mic</button>
+        <button id="connectPeerBtn" disabled>Connect (Simulate Peer)</button>
+        <h3>Signaling Messages (for PoC):</h3>
+        <textarea id="signalingMessages" rows="10" style="width: 90%; font-family: monospace; font-size: 0.9em;" readonly></textarea>
+    </div>
 </body>
 </html>

@@ -29,7 +29,25 @@ class GameSession(db.Model):
     current_player_id = db.Column(db.String(100), nullable=True) # Made it 100 char length
 
     # Relationship to Question model
-    current_question = db.relationship('Question', foreign_keys=[current_question_id])
+    current_question = db.relationship('Question', foreign_keys=[current_question_id], lazy='joined')
+
+    # New fields for Family Feud style strikes and steal logic
+    current_question_strikes = db.Column(db.Integer, default=0, nullable=False)
+    game_mode = db.Column(db.String(20), default='active', nullable=False) # e.g., 'active', 'steal_attempt', 'finished'
+    player_who_can_steal = db.Column(db.String(100), nullable=True) # Stores player_id, made it 100 char length
 
     def __repr__(self):
-        return f'<GameSession {self.id}: {self.session_name}>'
+        return f'<GameSession {self.id}: {self.session_name} Mode: {self.game_mode} Strikes: {self.current_question_strikes}>'
+
+class AudienceVote(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    game_session_id = db.Column(db.Integer, db.ForeignKey('game_session.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    selected_choice = db.Column(db.String(255), nullable=False) # Assuming choices are strings
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    game_session = db.relationship('GameSession', backref=db.backref('votes', lazy='dynamic'))
+    question = db.relationship('Question', backref=db.backref('votes', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<AudienceVote {self.id} for Q{self.question_id} in S{self.game_session_id} - Choice: {self.selected_choice}>'
